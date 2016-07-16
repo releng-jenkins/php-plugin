@@ -35,9 +35,6 @@ public class BuildStep extends Builder {
 			// TODO Populate the url of the jenkins configuration
 			throw new AbortException(
 					"Cannot find a " + php + " installation. Please check 'PHP installations' settings in Jenkins configuration.");
-			// listener.getLogger().println("FAILED TO FIND " + php + "
-			// INSTALLATION!");
-			// return false;
 		}
 		Node node = Computer.currentComputer().getNode();
 		if (node == null) {
