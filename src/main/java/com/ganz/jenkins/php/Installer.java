@@ -46,8 +46,8 @@ public class Installer extends DownloadFromUrlInstaller {
 	@Override
 	public FilePath performInstallation(ToolInstallation installation, Node node, TaskListener listener)
 			throws IOException, InterruptedException {
-		listener.getLogger().print(
-				"Checking  " + installation.getDescriptor().getDisplayName() + id + " installation on " + node.getDisplayName() + "...");
+		listener.getLogger().print("Checking  " + installation.getDescriptor().getDisplayName() + " " + id + " installation on "
+				+ node.getDisplayName() + "...");
 		FilePath home = preferredLocation(installation, node);
 		FilePath marker = home.child(".installedByJenkins");
 		if (marker.exists() && marker.readToString().equals(id)) {
