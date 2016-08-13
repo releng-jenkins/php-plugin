@@ -32,7 +32,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class Installer extends DownloadFromUrlInstaller {
-	private static String INSTALLABLES_URL = "http://repo.ganz.net/tool/jenkins/tool/php/";
+	private static String INSTALLABLES_URL = "http://192.168.72.227/tool/jenkins/tool/php/";
 
 	@DataBoundConstructor
 	public Installer(String id) {
