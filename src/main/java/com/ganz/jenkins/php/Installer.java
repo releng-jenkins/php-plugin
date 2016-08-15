@@ -212,11 +212,12 @@ public class Installer extends DownloadFromUrlInstaller {
 
 		@Override
 		public Downloadable createDownloadable() {
-			LOGGER.info("Creating downloadable " + getId());
+			LOGGER.info("Creating downloadable for " + getId() + " descriptor");
 			return new Downloadable(getId()) {
 
 				@Override
 				public String getUrl() {
+					LOGGER.info("getting the downloadable url " + Installer.INSTALLABLES_URL + " for " + getId() + " descriptor");
 					return Installer.INSTALLABLES_URL;
 				}
 
