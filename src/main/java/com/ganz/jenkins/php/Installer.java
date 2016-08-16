@@ -50,7 +50,7 @@ public class Installer extends DownloadFromUrlInstaller {
 				+ node.getDisplayName() + "...");
 		FilePath home = preferredLocation(installation, node);
 		FilePath marker = home.child(".installedByJenkins");
-		if (marker.exists() && marker.readToString().equals(id)) {
+		if (marker.exists() /* && marker.readToString().equals(id) */) {
 			// TODO L18N
 			listener.getLogger().println("okay.");
 			return home;
@@ -217,7 +217,7 @@ public class Installer extends DownloadFromUrlInstaller {
 
 				@Override
 				public String getUrl() {
-					LOGGER.info("getting the downloadable url " + Installer.INSTALLABLES_URL + " for " + getId() + " descriptor");
+					LOGGER.info("Getting the downloadable url for " + getId() + " descriptor : " + Installer.INSTALLABLES_URL);
 					return Installer.INSTALLABLES_URL;
 				}
 
