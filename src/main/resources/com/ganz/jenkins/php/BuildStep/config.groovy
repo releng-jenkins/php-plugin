@@ -1,7 +1,7 @@
 package com.ganz.jenkins.php.BuildStep;
 f=namespace(lib.FormTagLib)
 
-if (descriptor.installations.length != 0) {
+
     f.entry(title:_("Version")) {
         select(class:"setting-input",name:"_.php") {
         	option(value:"(Default)", _("Default"))
@@ -10,4 +10,3 @@ if (descriptor.installations.length != 0) {
             }
         }
     }
-}
