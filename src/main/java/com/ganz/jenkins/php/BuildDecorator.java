@@ -1,6 +1,7 @@
 package com.ganz.jenkins.php;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -13,6 +14,7 @@ import hudson.Proc;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Node;
 import hudson.model.Run.RunnerAbortedException;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
@@ -28,40 +30,22 @@ public class BuildDecorator extends BuildWrapper {
 		this.php = php;
 	}
 
-	// @Override
-	// public Environment setUp(AbstractBuild build, Launcher launcher,
-	// BuildListener listener) throws InterruptedException, IOException {
-	//
-	// Installation installation = getInstallation();
-	// // use the php installed on the system
-	// if (installation == null) {
-	// // TODO l18N
-	// // TODO Populate the url of the jenkins configuration
-	// throw new AbortException(
-	// "Cannot find a " + php + " installation. Please check 'PHP installations'
-	// settings in Jenkins configuration.");
-	// }
-	// Node node = Computer.currentComputer().getNode();
-	// if (node == null) {
-	// throw new AbortException("Cannot get installation for node, since it is
-	// not online.");
-	// }
-	//
-	// installation = installation.forNode(node, listener);
-	//
-	// build.getEnvironment(listener).put("PHP_HOME", installation.getHome());
-	// return new Environment() {
-	// @Override
-	// public void buildEnvVars(Map<String, String> env) {
-	//
-	// }
-	// };
-	//
-	// }
+	@Override
+	public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		return new Environment() {
+			@Override
+			public void buildEnvVars(Map<String, String> env) {
+
+			}
+		};
+	}
 
 	@Override
 	public Launcher decorateLauncher(AbstractBuild build, final Launcher launcher, BuildListener listener)
 			throws InterruptedException, IOException, RunnerAbortedException {
+
+		EnvVars buildEnv = build.getEnvironment(listener);
+		final EnvVars homes = new EnvVars();
 
 		Installation installation = getInstallation();
 		if (installation == null) {
@@ -69,13 +53,14 @@ public class BuildDecorator extends BuildWrapper {
 					"Cannot find a " + php + " installation. Please check 'PHP installations' settings in Jenkins configuration.");
 		}
 
-		Node node = Computer.currentComputer().getNode();
+		final Node node = build.getBuiltOn();
 		if (node == null) {
 			// FIXME
 		}
 
 		installation = installation.forNode(node, listener);
 
+		homes.put("PHP_HOME", installation.getHome());
 		return new LauncherDecorator(launcher) {
 			@Override
 			public Proc launch(ProcStarter starter) throws IOException {
@@ -92,6 +77,8 @@ public class BuildDecorator extends BuildWrapper {
 					vars.remove("PATH");
 					vars.put("PATH+", overallPaths);
 				}
+
+				vars.putAll(homes);
 				return getDecoratedLauncher().launch(starter.envs(vars));
 			}
 

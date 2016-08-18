@@ -40,6 +40,10 @@ public final class Installation extends ToolInstallation implements NodeSpecific
 
 	@Override
 	public String getHome() {
+		String home = super.getHome();
+		if (!home.isEmpty()) {
+			return home;
+		}
 		String version = "";
 		DescribableList<ToolProperty<?>, ToolPropertyDescriptor> properties = this.getProperties();
 		for (ToolProperty<?> property : properties) {
