@@ -1,19 +1,19 @@
 package com.ganz.jenkins.php;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.AbortException;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Proc;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Computer;
-import hudson.model.Node;
+import hudson.model.Run.RunnerAbortedException;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import jenkins.model.Jenkins;
@@ -28,32 +28,82 @@ public class BuildDecorator extends BuildWrapper {
 		this.php = php;
 	}
 
+	// @Override
+	// public Environment setUp(AbstractBuild build, Launcher launcher,
+	// BuildListener listener) throws InterruptedException, IOException {
+	//
+	// Installation installation = getInstallation();
+	// // use the php installed on the system
+	// if (installation == null) {
+	// // TODO l18N
+	// // TODO Populate the url of the jenkins configuration
+	// throw new AbortException(
+	// "Cannot find a " + php + " installation. Please check 'PHP installations'
+	// settings in Jenkins configuration.");
+	// }
+	// Node node = Computer.currentComputer().getNode();
+	// if (node == null) {
+	// throw new AbortException("Cannot get installation for node, since it is
+	// not online.");
+	// }
+	//
+	// installation = installation.forNode(node, listener);
+	//
+	// build.getEnvironment(listener).put("PHP_HOME", installation.getHome());
+	// return new Environment() {
+	// @Override
+	// public void buildEnvVars(Map<String, String> env) {
+	//
+	// }
+	// };
+	//
+	// }
+
 	@Override
-	public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+	public Launcher decorateLauncher(AbstractBuild build, final Launcher launcher, BuildListener listener)
+			throws InterruptedException, IOException, RunnerAbortedException {
 
 		Installation installation = getInstallation();
-		// use the php installed on the system
 		if (installation == null) {
-			// TODO l18N
-			// TODO Populate the url of the jenkins configuration
 			throw new AbortException(
 					"Cannot find a " + php + " installation. Please check 'PHP installations' settings in Jenkins configuration.");
 		}
+
 		Node node = Computer.currentComputer().getNode();
 		if (node == null) {
-			throw new AbortException("Cannot get installation for node, since it is not online.");
+			// FIXME
 		}
 
 		installation = installation.forNode(node, listener);
 
-		build.getEnvironment(listener).put("PHP_HOME", installation.getHome());
-		return new Environment() {
+		return new LauncherDecorator(launcher) {
 			@Override
-			public void buildEnvVars(Map<String, String> env) {
-
+			public Proc launch(ProcStarter starter) throws IOException {
+				EnvVars vars;
+				try {
+					vars = toEnvVars(starter.envs());
+				} catch (NullPointerException npe) {
+					vars = new EnvVars();
+				} catch (InterruptedException x) {
+					throw new IOException(x);
+				}
+				if (vars.containsKey("PATH")) {
+					final String overallPaths = vars.get("PATH");
+					vars.remove("PATH");
+					vars.put("PATH+", overallPaths);
+				}
+				return getDecoratedLauncher().launch(starter.envs(vars));
 			}
-		};
 
+			private EnvVars toEnvVars(String[] envs) throws IOException, InterruptedException {
+				EnvVars vars = node.toComputer().getEnvironment();
+				for (String line : envs) {
+					vars.addLine(line);
+				}
+				return vars;
+			}
+
+		};
 	}
 
 	public Installation getInstallation() {
