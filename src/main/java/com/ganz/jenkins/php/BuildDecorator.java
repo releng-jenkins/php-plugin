@@ -44,7 +44,8 @@ public class BuildDecorator extends BuildWrapper {
 	public Launcher decorateLauncher(AbstractBuild build, final Launcher launcher, BuildListener listener)
 			throws InterruptedException, IOException, RunnerAbortedException {
 
-		EnvVars buildEnv = build.getEnvironment(listener);
+		//FIXME:remove
+		//EnvVars buildEnv = build.getEnvironment(listener);
 		final EnvVars homes = new EnvVars();
 
 		Installation installation = getInstallation();
@@ -61,6 +62,7 @@ public class BuildDecorator extends BuildWrapper {
 		installation = installation.forNode(node, listener);
 
 		homes.put("PHP_HOME", installation.getHome());
+		homes.put("LD_LIBRARY_PATH", installation.getHome());
 		return new LauncherDecorator(launcher) {
 			@Override
 			public Proc launch(ProcStarter starter) throws IOException {
