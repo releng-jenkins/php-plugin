@@ -74,12 +74,6 @@ public class BuildDecorator extends BuildWrapper {
 				} catch (InterruptedException x) {
 					throw new IOException(x);
 				}
-				if (vars.containsKey("PATH")) {
-					final String overallPaths = vars.get("PATH");
-					vars.remove("PATH");
-					vars.put("PATH+", overallPaths);
-				}
-
 				vars.putAll(homes);
 				return getDecoratedLauncher().launch(starter.envs(vars));
 			}
